@@ -30,7 +30,7 @@
 
 #ifdef _WIN32
 
-#ifndef __MINGW32__
+// #ifndef __MINGW32__
 /* millisecond-precision port of gettimeofday for Win32, taken from
    src/port/gettimeofday.c in PostgreSQL core */
 
@@ -72,7 +72,7 @@ timeradd(struct timeval *a, struct timeval *b, struct timeval *c)
     c->tv_sec += 1;
   }
 }
-#endif /* !defined(__MINGW32__) */
+// #endif /* !defined(__MINGW32__) */
 
 /* timersub is missing on mingw & MS VC */
 void

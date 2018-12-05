@@ -78,7 +78,10 @@ Operating System :: Unix
 
 version_flags = ['dt', 'dec']
 
+PLATFORM_IS_MINGW = get_platform().lower().startswith('ming')
 PLATFORM_IS_WINDOWS = sys.platform.lower().startswith('win')
+
+os.sep = '\\'
 
 
 class PostgresConfig:
@@ -134,6 +137,12 @@ For further information please check the 'doc/src/install.rst' file (also at
         for dir_name in path_directories:
             fullpath = os.path.join(dir_name, exename)
             if os.path.isfile(fullpath):
+
+                if PLATFORM_IS_MINGW:
+                    fullpath = fullpath.replace('/', '\\')
+
+                # print('fullpath:', fullpath)
+
                 return fullpath
         return None
 
@@ -154,12 +163,18 @@ For further information please check the 'doc/src/install.rst' file (also at
         # First, check for pg_config.exe on the PATH, and use that if found.
         pg_config_exe = self.find_on_path('pg_config.exe')
         if pg_config_exe:
+            if PLATFORM_IS_MINGW:
+                pg_config_exe = pg_config_exe.replace('/', '\\')
+
             return pg_config_exe
 
         # Now, try looking in the Windows Registry to find a PostgreSQL
         # installation, and infer the path from that.
         pg_config_exe = self._get_pg_config_from_registry()
         if pg_config_exe:
+            if PLATFORM_IS_MINGW:
+                pg_config_exe = pg_config_exe.replace('/', '\\')
+
             return pg_config_exe
 
         return None
@@ -252,7 +267,8 @@ class psycopg_build_ext(build_ext):
         return self.get_compiler_name().lower().startswith('msvc')
 
     def compiler_is_mingw(self):
-        return self.get_compiler_name().lower().startswith('mingw')
+        # return self.get_compiler_name().lower().startswith('mingw')
+        return True
 
     def get_compiler_name(self):
         """Return the name of the C compiler used to compile extensions.
@@ -414,6 +430,9 @@ For further information please check the 'doc/src/install.rst' file (also at
             self.include_dirs.append(pg_config_helper.query("includedir"))
             self.include_dirs.append(pg_config_helper.query("includedir-server"))
             pgversion = pg_config_helper.query("version").split()[1]
+
+            # print('INCLUDES:', self.include_dirs)
+            # print('LIBRARIES:', self.library_dirs)
 
             verre = re.compile(
                 r"(\d+)(?:\.(\d+))?(?:(?:\.(\d+))|(devel|(?:alpha|beta|rc)\d+))?")
